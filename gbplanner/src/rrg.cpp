@@ -573,14 +573,16 @@ double Rrg::projectSampleEleMap(Eigen::Vector3d& sample,
 {
   std::vector<Eigen::Vector3d> extra_samples(5, Eigen::Vector3d::Zero());
   extra_samples[0] = Eigen::Vector3d(0.0, 0.0, 0.0);
-  extra_samples[1] = Eigen::Vector3d(robot_box_size_.x()/2.0, robot_box_size_.y()/2.0, 0.0);
-  extra_samples[2] = Eigen::Vector3d(-robot_box_size_.x()/2.0, robot_box_size_.y()/2.0, 0.0);
-  extra_samples[3] = Eigen::Vector3d(robot_box_size_.x()/2.0, -robot_box_size_.y()/2.0, 0.0);
-  extra_samples[4] = Eigen::Vector3d(-robot_box_size_.x()/2.0, -robot_box_size_.y()/2.0, 0.0);
+  // Experimental G1 terrain footprint: 0.5 m x 0.5 m.
+  // Full-body collision bounds remain unchanged.
+  extra_samples[1] = Eigen::Vector3d( 0.25,  0.25, 0.0);
+  extra_samples[2] = Eigen::Vector3d(-0.25,  0.25, 0.0);
+  extra_samples[3] = Eigen::Vector3d( 0.25, -0.25, 0.0);
+  extra_samples[4] = Eigen::Vector3d(-0.25, -0.25, 0.0);
 
-  if (!ele_map_.exists("elevation"))
+  if (!ele_map_.exists("elevation_inpainted"))
   {
-    ROS_WARN("No 'elevation' layer in map.");
+    ROS_WARN("No 'elevation_inpainted' layer in map.");
     voxel_status = VoxelStatus::kFree;
     return -1.0;
   }
@@ -602,13 +604,13 @@ double Rrg::projectSampleEleMap(Eigen::Vector3d& sample,
       admissible = false;
       break;
     }
-    if(!ele_map_.isValid(index, "elevation"))
+    if(!ele_map_.isValid(index, "elevation_inpainted"))
     {
       admissible = false;
       break;
     }
 
-    double z = ele_map_.atPosition("elevation", pos);
+    double z = ele_map_.atPosition("elevation_inpainted", pos);
     if(i == 0)
     {
       z_center = z;
